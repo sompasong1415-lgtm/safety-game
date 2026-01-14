@@ -17,45 +17,50 @@
             font-family: 'Segoe UI', Tahoma, sans-serif; 
             display: flex; flex-direction: column; align-items: center; 
             background: var(--bg-color); margin: 0; 
-            height: 100vh; overflow: hidden; touch-action: manipulation;
+            height: 100vh; width: 100vw;
+            overflow: hidden; touch-action: manipulation;
         }
 
         #stats-bar { 
             display: flex; gap: 10px; margin: 1vh 0; 
-            width: 95%; max-width: 800px; height: 7vh;
+            width: 95%; max-width: 600px; height: 8vh;
         }
         .stat-box { 
             flex: 1; display: flex; align-items: center; justify-content: center;
             background: white; border-radius: 12px; font-weight: bold;
-            font-size: clamp(16px, 4vw, 28px); border-bottom: 4px solid #dfe6e9;
+            font-size: clamp(16px, 4vw, 24px); border-bottom: 4px solid #dfe6e9;
         }
 
-        #timer-box.warning { color: var(--danger); animation: shake 0.5s infinite; }
-        @keyframes shake { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-1deg); } 75% { transform: rotate(1deg); } }
-
-        /* Game Board - ปรับเป็น 4 คอลัมน์ในแนวตั้งเพื่อให้จำนวนแถวลดลง */
+        /* Game Board - บังคับ 3 คอลัมน์ และจำกัดความสูงเข้มงวด */
         .game-container { 
             display: grid;
-            grid-template-columns: repeat(4, 1fr); 
-            gap: 6px; 
-            width: 98vw; 
-            max-width: 1000px;
-            height: 88vh; 
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 5px; /* ลดระยะห่างเพื่อประหยัดที่ */
+            width: 95vw; 
+            max-width: 450px;
+            height: 85vh; /* บังคับให้พื้นที่เกมใช้แค่ 85% ของความสูงจอ */
+            margin: 0 auto;
             padding: 5px;
-            margin: auto;
-            align-content: center;
+            /* จัดให้การ์ดเรียงตัวกึ่งกลางและไม่ยืดจนล้น */
+            align-content: center; 
+            justify-items: center;
         }
 
         /* สำหรับจอคอมพิวเตอร์ หรือแนวนอน */
         @media (min-width: 768px) or (orientation: landscape) {
             .game-container { 
                 grid-template-columns: repeat(6, 1fr); 
+                max-width: 1000px;
                 gap: 15px;
             }
         }
 
         .card { 
-            position: relative; width: 100%; aspect-ratio: 1 / 1; 
+            position: relative; 
+            width: 100%; 
+            /* ใช้สัดส่วนจตุรัส แต่ถ้าจอเตี้ยเกินไปจะยอมให้เล็กลง */
+            max-width: 12vh; 
+            aspect-ratio: 1 / 1; 
             cursor: pointer; perspective: 1000px; 
         }
 
@@ -68,37 +73,30 @@
 
         .card-front, .card-back {
             position: absolute; width: 100%; height: 100%;
-            backface-visibility: hidden; border-radius: 10px;
+            backface-visibility: hidden; border-radius: 8px;
             display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
         .card-front { 
             background: var(--card-front); color: white; 
-            font-size: clamp(10px, 2.5vw, 20px); border: 2px solid #5758bb;
+            font-size: clamp(10px, 3vw, 14px); border: 2px solid #5758bb;
             text-align: center; font-weight: bold;
         }
 
         .card-back { 
             background: var(--card-back); transform: rotateY(180deg); 
-            font-size: clamp(28px, 8vw, 75px); 
-            border: 3px solid #6c5ce7;
+            font-size: clamp(24px, 7vh, 60px); /* ปรับขนาด Emoji ตามความสูงหน้าจอ */
+            border: 2px solid #6c5ce7;
         }
 
         .card.matched .card-back { background: #e3fcef; border-color: var(--success); }
 
         #message { 
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
-            padding: 30px; background: white; border-radius: 25px; display: none; 
+            padding: 25px; background: white; border-radius: 20px; display: none; 
             text-align: center; box-shadow: 0 20px 80px rgba(0,0,0,0.4); 
-            width: 90%; max-width: 400px; z-index: 100; border: 5px solid var(--success);
-        }
-        #message h1 { font-size: 26px; margin: 0; }
-        #message p { font-size: 20px; margin: 15px 0; font-weight: bold; }
-        .btn-play { 
-            padding: 15px; font-size: 18px; background: var(--success); color: white; 
-            border: none; border-radius: 15px; width: 100%; font-weight: bold; 
-            cursor: pointer; box-shadow: 0 5px #00947a;
+            width: 85%; max-width: 350px; z-index: 100; border: 4px solid var(--success);
         }
     </style>
 </head>
@@ -112,9 +110,9 @@
 <div class="game-container" id="gameBoard"></div>
 
 <div id="message">
-    <h1 id="msg-header">สรุปผล</h1>
-    <p>จับคู่ได้: <span id="finalScore">0</span> คู่</p>
-    <button class="btn-play" onclick="startGame()">เล่นใหม่อีกครั้ง</button>
+    <h1 id="msg-header" style="font-size: 24px; margin: 0;">สรุปผล</h1>
+    <p id="score-text" style="font-size: 18px; margin: 15px 0;">จับคู่ได้: <span id="finalScore">0</span> คู่</p>
+    <button onclick="startGame()" style="padding: 12px; font-size: 18px; background: var(--success); color: white; border: none; border-radius: 15px; width: 100%; font-weight: bold; cursor: pointer; box-shadow: 0 4px #00947a;">เล่นใหม่อีกครั้ง</button>
 </div>
 
 <script>
