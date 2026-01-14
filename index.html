@@ -6,12 +6,9 @@
     <title>Safety Day Challenge</title>
     <style>
         :root { 
-            --primary: #2c3e50; 
-            --bg-color: #f0f3f7;
-            --card-front: #6c5ce7; 
-            --card-back: #ffffff;
-            --success: #00b894;
-            --danger: #d63031;
+            --primary: #2c3e50; --bg-color: #f0f3f7;
+            --card-front: #6c5ce7; --card-back: #ffffff;
+            --success: #00b894; --danger: #d63031;
         }
 
         * { box-sizing: border-box; }
@@ -19,58 +16,47 @@
         body { 
             font-family: 'Segoe UI', Tahoma, sans-serif; 
             display: flex; flex-direction: column; align-items: center; 
-            background: var(--bg-color); 
-            margin: 0; 
-            height: 100vh;
-            overflow: hidden; 
-            touch-action: manipulation;
+            background: var(--bg-color); margin: 0; 
+            height: 100vh; overflow: hidden; touch-action: manipulation;
         }
 
-        /* Stats Bar */
         #stats-bar { 
-            display: flex; gap: 15px; 
-            margin: 2vh 0; 
-            width: 95%; max-width: 1000px;
-            height: 8vh;
+            display: flex; gap: 10px; margin: 1vh 0; 
+            width: 95%; max-width: 800px; height: 7vh;
         }
         .stat-box { 
             flex: 1; display: flex; align-items: center; justify-content: center;
-            background: white; border-radius: 15px; 
-            font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-            font-size: clamp(20px, 4vw, 32px); 
-            border-bottom: 5px solid #dfe6e9;
+            background: white; border-radius: 12px; font-weight: bold;
+            font-size: clamp(16px, 4vw, 28px); border-bottom: 4px solid #dfe6e9;
         }
 
         #timer-box.warning { color: var(--danger); animation: shake 0.5s infinite; }
         @keyframes shake { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-1deg); } 75% { transform: rotate(1deg); } }
 
-        /* Game Board - ปรับให้ยืดหยุ่นสูง */
+        /* Game Board - ปรับเป็น 4 คอลัมน์ในแนวตั้งเพื่อให้จำนวนแถวลดลง */
         .game-container { 
             display: grid;
-            grid-template-columns: repeat(3, 1fr); /* เริ่มต้นที่ 3 คอลัมน์สำหรับมือถือ */
-            gap: 10px; 
-            width: 95vw; 
-            max-width: 1200px;
-            height: 80vh; 
-            padding: 10px;
+            grid-template-columns: repeat(4, 1fr); 
+            gap: 6px; 
+            width: 98vw; 
+            max-width: 1000px;
+            height: 88vh; 
+            padding: 5px;
             margin: auto;
             align-content: center;
         }
 
-        /* ปรับสำหรับการแสดงผลบนคอมพิวเตอร์ หรือจอ TV (แนวนอน) */
-        @media (min-width: 768px) {
+        /* สำหรับจอคอมพิวเตอร์ หรือแนวนอน */
+        @media (min-width: 768px) or (orientation: landscape) {
             .game-container { 
-                grid-template-columns: repeat(6, 1fr); /* ขยายเป็น 6 คอลัมน์บนคอม */
-                gap: 20px;
+                grid-template-columns: repeat(6, 1fr); 
+                gap: 15px;
             }
         }
 
         .card { 
-            position: relative;
-            width: 100%;
-            aspect-ratio: 1 / 1; 
-            cursor: pointer; 
-            perspective: 1000px; 
+            position: relative; width: 100%; aspect-ratio: 1 / 1; 
+            cursor: pointer; perspective: 1000px; 
         }
 
         .card-inner {
@@ -82,41 +68,37 @@
 
         .card-front, .card-back {
             position: absolute; width: 100%; height: 100%;
-            backface-visibility: hidden; border-radius: 15px;
+            backface-visibility: hidden; border-radius: 10px;
             display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 3px 8px rgba(0,0,0,0.1);
         }
 
         .card-front { 
             background: var(--card-front); color: white; 
-            font-size: clamp(14px, 2.5vw, 24px); border: 4px solid #5758bb;
+            font-size: clamp(10px, 2.5vw, 20px); border: 2px solid #5758bb;
             text-align: center; font-weight: bold;
         }
 
         .card-back { 
             background: var(--card-back); transform: rotateY(180deg); 
-            font-size: clamp(40px, 8vw, 90px); /* Emoji จะใหญ่ขึ้นตามขนาดจอคอม */
-            border: 4px solid #6c5ce7;
+            font-size: clamp(28px, 8vw, 75px); 
+            border: 3px solid #6c5ce7;
         }
 
         .card.matched .card-back { background: #e3fcef; border-color: var(--success); }
 
-        /* Message Box */
         #message { 
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
-            padding: 40px; background: white; border-radius: 30px; display: none; 
+            padding: 30px; background: white; border-radius: 25px; display: none; 
             text-align: center; box-shadow: 0 20px 80px rgba(0,0,0,0.4); 
-            width: 85%; max-width: 450px; z-index: 100;
-            border: 5px solid var(--success);
+            width: 90%; max-width: 400px; z-index: 100; border: 5px solid var(--success);
         }
-        #message h1 { font-size: 36px; margin: 0; }
-        #message p { font-size: 28px; margin: 25px 0; font-weight: bold; }
-
+        #message h1 { font-size: 26px; margin: 0; }
+        #message p { font-size: 20px; margin: 15px 0; font-weight: bold; }
         .btn-play { 
-            padding: 20px; font-size: 24px; 
-            background: var(--success); color: white; 
-            border: none; border-radius: 20px; width: 100%; 
-            font-weight: bold; cursor: pointer; box-shadow: 0 6px #00947a;
+            padding: 15px; font-size: 18px; background: var(--success); color: white; 
+            border: none; border-radius: 15px; width: 100%; font-weight: bold; 
+            cursor: pointer; box-shadow: 0 5px #00947a;
         }
     </style>
 </head>
@@ -137,46 +119,31 @@
 
 <script>
     const ppeIcons = ['⛑️', '🧯', '🦺', '🥽', '🧤', '🥾', '😷', '🎧', '🚧'];
-    const GAME_TIME = 20; 
-    const MEMORY_TIME = 3000; 
-    
+    const GAME_TIME = 20; const MEMORY_TIME = 3000; 
     let ppeCards = [...ppeIcons, ...ppeIcons];
-    let flippedCards = [];
-    let matchedPairs = 0;
-    let timeLeft = GAME_TIME;
-    let timerInterval;
-    let canClick = false;
+    let flippedCards = []; let matchedPairs = 0;
+    let timeLeft = GAME_TIME; let timerInterval; let canClick = false;
 
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
     function playBeep(freq, duration, vol) {
         if (audioCtx.state === 'suspended') audioCtx.resume();
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        osc.type = 'sine'; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
         gain.gain.setValueAtTime(vol, audioCtx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + duration);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(); osc.stop(audioCtx.currentTime + duration);
     }
 
     function playApplause() {
-        for(let i=0; i<20; i++) {
-            setTimeout(() => playBeep(200 + Math.random() * 600, 0.2, 0.1), i * 50);
-        }
+        for(let i=0; i<20; i++) setTimeout(() => playBeep(200 + Math.random() * 600, 0.2, 0.1), i * 50);
     }
 
     function startGame() {
         const board = document.getElementById('gameBoard');
-        board.innerHTML = '';
-        matchedPairs = 0;
-        timeLeft = GAME_TIME;
-        flippedCards = [];
-        canClick = false;
-        
+        board.innerHTML = ''; matchedPairs = 0; timeLeft = GAME_TIME;
+        flippedCards = []; canClick = false;
         document.getElementById('timer').textContent = timeLeft;
         document.getElementById('timer-box').classList.remove('warning');
         document.getElementById('currentMatches').textContent = '0';
@@ -193,16 +160,14 @@
 
         setTimeout(() => {
             document.querySelectorAll('.card').forEach(c => c.classList.remove('flipped'));
-            canClick = true;
-            startTimer();
+            canClick = true; startTimer();
         }, MEMORY_TIME);
     }
 
     function startTimer() {
         clearInterval(timerInterval);
         timerInterval = setInterval(() => {
-            timeLeft--;
-            document.getElementById('timer').textContent = timeLeft;
+            timeLeft--; document.getElementById('timer').textContent = timeLeft;
             if (timeLeft <= 5 && timeLeft > 0) {
                 document.getElementById('timer-box').classList.add('warning');
                 playBeep(440, 0.1, 0.2); 
@@ -214,53 +179,41 @@
     document.getElementById('gameBoard').addEventListener('click', e => {
         const card = e.target.closest('.card');
         if (!card || !canClick || card.classList.contains('flipped') || card.classList.contains('matched')) return;
-
         playBeep(600, 0.05, 0.1);
-        card.classList.add('flipped');
-        flippedCards.push(card);
-        
+        card.classList.add('flipped'); flippedCards.push(card);
         if (flippedCards.length === 2) {
             canClick = false;
             if (flippedCards[0].dataset.icon === flippedCards[1].dataset.icon) {
                 setTimeout(() => {
                     playBeep(800, 0.2, 0.1);
                     flippedCards.forEach(c => c.classList.add('matched'));
-                    matchedPairs++;
-                    document.getElementById('currentMatches').textContent = matchedPairs;
-                    flippedCards = [];
-                    canClick = true;
+                    matchedPairs++; document.getElementById('currentMatches').textContent = matchedPairs;
+                    flippedCards = []; canClick = true;
                     if (matchedPairs === 9) endGame();
                 }, 300);
             } else {
                 setTimeout(() => {
                     flippedCards.forEach(c => c.classList.remove('flipped'));
-                    flippedCards = [];
-                    canClick = true;
+                    flippedCards = []; canClick = true;
                 }, 600);
             }
         }
     });
 
     function endGame() {
-        clearInterval(timerInterval);
-        canClick = false;
+        clearInterval(timerInterval); canClick = false;
         const msgHeader = document.getElementById('msg-header');
         const messageDiv = document.getElementById('message');
-        
         if (matchedPairs === 9) {
             msgHeader.textContent = "ภารกิจสำเร็จ! 🏆";
-            messageDiv.style.borderColor = "var(--success)";
-            playApplause();
+            messageDiv.style.borderColor = "var(--success)"; playApplause();
         } else {
             msgHeader.textContent = "หมดเวลา! ⏱️";
-            messageDiv.style.borderColor = "var(--danger)";
-            playBeep(150, 0.5, 0.3);
+            messageDiv.style.borderColor = "var(--danger)"; playBeep(150, 0.5, 0.3);
         }
-
         document.getElementById('finalScore').textContent = matchedPairs;
         messageDiv.style.display = 'block';
     }
-
     window.onload = startGame;
 </script>
 </body>
