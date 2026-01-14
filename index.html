@@ -11,19 +11,19 @@
             --success: #00b894; --danger: #d63031;
         }
 
-        * { box-sizing: border-box; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         body { 
             font-family: 'Segoe UI', Tahoma, sans-serif; 
             display: flex; flex-direction: column; align-items: center; 
             background: var(--bg-color); margin: 0; 
-            height: 100vh; width: 100vw;
-            overflow: hidden; touch-action: manipulation;
+            height: 100dvh; /* ใช้ dvh เพื่อให้พอดีจอที่มีแถบเมนูบราวเซอร์ */
+            width: 100vw; overflow: hidden; touch-action: manipulation;
         }
 
         #stats-bar { 
-            display: flex; gap: 10px; margin: 1vh 0; 
-            width: 95%; max-width: 600px; height: 8vh;
+            display: flex; gap: 10px; padding: 10px;
+            width: 95%; max-width: 600px; height: 12%; /* สัดส่วนคงที่ */
         }
         .stat-box { 
             flex: 1; display: flex; align-items: center; justify-content: center;
@@ -31,31 +31,36 @@
             font-size: clamp(16px, 4vw, 24px); border-bottom: 4px solid #dfe6e9;
         }
 
-        /* Game Board - ปรับให้การ์ดเกาะกลุ่มกัน ไม่กระจายห่าง */
-        .game-container { 
-            display: grid;
-            grid-template-columns: repeat(3, minmax(0, 120px)); /* บล็อกขนาดการ์ดไม่ให้ใหญ่เกินไป */
-            gap: 8px;
-            width: fit-content; /* ให้คอนเทนเนอร์กว้างเท่ากับจำนวนการ์ดพอดี */
-            max-height: 85vh;
-            margin: auto; /* จัดกึ่งกลางหน้าจอเสมอ */
-            padding: 10px;
-            justify-content: center;
+        /* Container หลักที่จะควบคุมขนาดลูก */
+        #game-wrapper {
+            flex: 1; /* กินพื้นที่ที่เหลือทั้งหมด */
+            width: 100%; display: flex; align-items: center; justify-content: center;
+            padding: 5px; min-height: 0;
         }
 
-        /* สำหรับจอคอมพิวเตอร์ หรือแนวนอน */
+        .game-container { 
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 6px;
+            width: 100%; height: 100%; /* ยืดให้เต็มพื้นที่ที่ wrapper เหลือให้ */
+            max-width: 400px; /* จำกัดความกว้างในคอม */
+            max-height: 600px; /* จำกัดไม่ให้ยาวเกินไปในจอคอม */
+            padding: 5px;
+            /* จัดการเรื่องความสูงการ์ดให้พอดี 6 แถว */
+            grid-template-rows: repeat(6, 1fr); 
+        }
+
         @media (min-width: 768px) or (orientation: landscape) {
             .game-container { 
-                grid-template-columns: repeat(6, minmax(0, 140px)); /* ขยายเป็น 6 คอลัมน์ที่ขนาดพอเหมาะ */
-                gap: 12px;
+                grid-template-columns: repeat(6, 1fr); 
+                grid-template-rows: repeat(3, 1fr);
+                max-width: 1000px; max-height: 500px;
             }
         }
 
         .card { 
-            position: relative; 
-            width: 100%; 
-            aspect-ratio: 1 / 1; 
-            cursor: pointer; perspective: 1000px; 
+            position: relative; width: 100%; height: 100%; 
+            perspective: 1000px; min-height: 0;
         }
 
         .card-inner {
@@ -69,18 +74,18 @@
             position: absolute; width: 100%; height: 100%;
             backface-visibility: hidden; border-radius: 10px;
             display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
         .card-front { 
             background: var(--card-front); color: white; 
-            font-size: clamp(10px, 2vw, 18px); border: 3px solid #5758bb;
+            font-size: clamp(10px, 2.5vh, 16px); border: 2px solid #5758bb;
             text-align: center; font-weight: bold;
         }
 
         .card-back { 
             background: var(--card-back); transform: rotateY(180deg); 
-            font-size: clamp(30px, 6vw, 70px); 
+            font-size: clamp(25px, 6vh, 60px); 
             border: 3px solid #6c5ce7;
         }
 
@@ -101,7 +106,9 @@
     <div class="stat-box">🎯 <span id="currentMatches">0</span>/9</div>
 </div>
 
-<div class="game-container" id="gameBoard"></div>
+<div id="game-wrapper">
+    <div class="game-container" id="gameBoard"></div>
+</div>
 
 <div id="message">
     <h1 id="msg-header" style="font-size: 28px; margin: 0;">สรุปผล</h1>
