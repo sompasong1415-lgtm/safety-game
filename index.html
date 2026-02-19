@@ -18,41 +18,45 @@
             display: flex; flex-direction: column; align-items: center; 
             background: var(--bg-color); margin: 0; 
             height: 100dvh; width: 100vw; overflow: hidden; touch-action: manipulation;
-            transition: background 0.1s;
         }
 
-        /* เอฟเฟกต์ระเบิด (Visual Explosion) */
+        /* หน้าเลือกโหมดตอนเริ่ม */
+        #mode-selection {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(44, 62, 80, 0.95); z-index: 2000;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: white; padding: 20px; text-align: center;
+        }
+        .mode-btn {
+            width: 80%; max-width: 300px; padding: 20px; margin: 10px;
+            font-size: 22px; font-weight: bold; border: none; border-radius: 15px;
+            cursor: pointer; transition: transform 0.2s;
+        }
+        .btn-normal { background: #e67e22; color: white; }
+        .btn-easy { background: var(--success); color: white; }
+
+        /* เอฟเฟกต์ระเบิด */
         #explosion-overlay {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
             pointer-events: none; z-index: 999; display: none;
             justify-content: center; align-items: center;
         }
-
         .boom-circle {
             position: absolute; border-radius: 50%;
             background: radial-gradient(circle, #fff 10%, #ffcc00 40%, #ff6600 70%, transparent 100%);
             animation: boom-grow 0.6s ease-out forwards;
         }
-
         @keyframes boom-grow {
             0% { width: 0; height: 0; opacity: 1; }
-            50% { opacity: 1; }
             100% { width: 150vmax; height: 150vmax; opacity: 0; }
         }
 
-        /* หน้าจอสั่น */
         .shake-screen { animation: screen-shake 0.5s both; }
         @keyframes screen-shake {
             10%, 90% { transform: translate3d(-5px, 0, 0); }
-            20%, 80% { transform: translate3d(8px, 0, 0); }
-            30%, 50%, 70% { transform: translate3d(-12px, 0, 0); }
-            40%, 60% { transform: translate3d(12px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-10px, 0, 0); }
         }
 
-        /* แฟลชหน้าจอมืด */
-        .flash-dark { background: #000 !important; }
-
-        /* พลุกระดาษเมื่อชนะ */
         .confetti {
             position: absolute; width: 10px; height: 10px; z-index: 99;
             animation: confetti-fall 3s ease-out forwards;
@@ -62,7 +66,6 @@
             100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
         }
 
-        /* ส่วนประกอบเกม */
         #stats-bar { display: flex; gap: 10px; padding: 10px; width: 95%; max-width: 600px; height: 12%; }
         .stat-box { flex: 1; display: flex; align-items: center; justify-content: center; background: white; border-radius: 12px; font-weight: bold; font-size: clamp(16px, 4vw, 24px); border-bottom: 4px solid #dfe6e9; }
         #game-wrapper { flex: 1; width: 100%; display: flex; align-items: center; justify-content: center; padding: 5px; min-height: 0; }
@@ -85,10 +88,17 @@
 </head>
 <body>
 
+<div id="mode-selection">
+    <h1 style="margin-bottom: 30px;">เลือกความยาก</h1>
+    <button class="mode-btn btn-normal" onclick="setDifficulty(20)">ปกติ (20 วินาที)</button>
+    <button class="mode-btn btn-easy" onclick="setDifficulty(25)">ง่าย (25 วินาที)</button>
+    <p style="margin-top: 20px; font-size: 14px; opacity: 0.8;">Safety Day Challenge</p>
+</div>
+
 <div id="explosion-overlay"><div class="boom-circle"></div></div>
 
 <div id="stats-bar">
-    <div class="stat-box">⏱️ <span id="timer">25</span></div>
+    <div class="stat-box">⏱️ <span id="timer">--</span></div>
     <div class="stat-box">🎯 <span id="currentMatches">0</span>/9</div>
 </div>
 
@@ -99,14 +109,13 @@
 <div id="message">
     <h1 id="msg-header">สรุปผล</h1>
     <p>จับคู่ได้: <span id="finalScore">0</span> คู่</p>
-    <button onclick="startGame()" style="padding: 15px; font-size: 20px; background: var(--success); color: white; border: none; border-radius: 15px; width: 100%; font-weight: bold; cursor: pointer;">เล่นใหม่อีกครั้ง</button>
+    <button onclick="resetToMenu()" style="padding: 15px; font-size: 20px; background: var(--success); color: white; border: none; border-radius: 15px; width: 100%; font-weight: bold; cursor: pointer;">กลับหน้าหลัก</button>
 </div>
 
 <script>
     const ppeIcons = ['⛑️', '🧯', '🦺', '🥽', '🧤', '🥾', '😷', '🎧', '🚧'];
     let ppeCards = [...ppeIcons, ...ppeIcons];
-    // ปรับแก้ตรงนี้ให้เป็น 25
-    let flippedCards = [], matchedPairs = 0, timeLeft = 25, timerInterval, canClick = false;
+    let flippedCards = [], matchedPairs = 0, timeLeft = 20, selectedTime = 20, timerInterval, canClick = false;
 
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
@@ -122,14 +131,25 @@
         osc.start(); osc.stop(audioCtx.currentTime + duration);
     }
 
+    function setDifficulty(seconds) {
+        selectedTime = seconds;
+        document.getElementById('mode-selection').style.display = 'none';
+        startGame();
+    }
+
+    function resetToMenu() {
+        document.getElementById('message').style.display = 'none';
+        document.getElementById('mode-selection').style.display = 'flex';
+    }
+
     function triggerExplosionEffect() {
         const overlay = document.getElementById('explosion-overlay');
         overlay.style.display = 'flex';
-        document.body.classList.add('shake-screen', 'flash-dark');
+        document.body.classList.add('shake-screen');
         playSound(60, 1.5, 0.6, 'sawtooth');
         setTimeout(() => {
             overlay.style.display = 'none';
-            document.body.classList.remove('shake-screen', 'flash-dark');
+            document.body.classList.remove('shake-screen');
         }, 800);
     }
 
@@ -155,11 +175,9 @@
 
     function startGame() {
         const board = document.getElementById('gameBoard');
-        board.innerHTML = ''; matchedPairs = 0; timeLeft = 25; // ปรับแก้ตรงนี้ให้เป็น 25
-        flippedCards = []; canClick = false;
+        board.innerHTML = ''; matchedPairs = 0; timeLeft = selectedTime; flippedCards = []; canClick = false;
         document.getElementById('timer').textContent = timeLeft;
         document.getElementById('currentMatches').textContent = '0';
-        document.getElementById('message').style.display = 'none';
         
         const shuffled = [...ppeCards].sort(() => Math.random() - 0.5);
         shuffled.forEach(emoji => {
@@ -211,27 +229,22 @@
 
     function endGame() {
         clearInterval(timerInterval); canClick = false;
-        
         if (matchedPairs === 9) {
             playWinSound(); createConfetti();
             setTimeout(() => {
                 document.getElementById('msg-header').textContent = "ชนะแล้ว! 🎉";
-                document.getElementById('message').style.borderColor = "var(--success)";
                 document.getElementById('finalScore').textContent = matchedPairs;
                 document.getElementById('message').style.display = 'block';
             }, 1000);
         } else {
             triggerExplosionEffect();
             setTimeout(() => {
-                document.getElementById('msg-header').textContent = "ตู้มมม! 💥 หมดเวลา";
-                document.getElementById('message').style.borderColor = "var(--danger)";
+                document.getElementById('msg-header').textContent = "ตู้มมม! 💥";
                 document.getElementById('finalScore').textContent = matchedPairs;
                 document.getElementById('message').style.display = 'block';
             }, 1200);
         }
     }
-
-    window.onload = startGame;
 </script>
 </body>
 </html>
