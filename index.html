@@ -18,16 +18,39 @@
             display: flex; flex-direction: column; align-items: center; 
             background: var(--bg-color); margin: 0; 
             height: 100dvh; width: 100vw; overflow: hidden; touch-action: manipulation;
+            transition: background 0.1s;
         }
 
-        /* เอฟเฟกต์หน้าจอสั่นแรงๆ ตอนระเบิด */
-        .shake-screen { animation: screen-shake 0.6s cubic-bezier(.36,.07,.19,.97) both; }
-        @keyframes screen-shake {
-            10%, 90% { transform: translate3d(-4px, 0, 0); }
-            20%, 80% { transform: translate3d(6px, 0, 0); }
-            30%, 50%, 70% { transform: translate3d(-10px, 0, 0); }
-            40%, 60% { transform: translate3d(10px, 0, 0); }
+        /* เอฟเฟกต์ระเบิด (Visual Explosion) */
+        #explosion-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none; z-index: 999; display: none;
+            justify-content: center; align-items: center;
         }
+
+        .boom-circle {
+            position: absolute; border-radius: 50%;
+            background: radial-gradient(circle, #fff 10%, #ffcc00 40%, #ff6600 70%, transparent 100%);
+            animation: boom-grow 0.6s ease-out forwards;
+        }
+
+        @keyframes boom-grow {
+            0% { width: 0; height: 0; opacity: 1; }
+            50% { opacity: 1; }
+            100% { width: 150vmax; height: 150vmax; opacity: 0; }
+        }
+
+        /* หน้าจอสั่น */
+        .shake-screen { animation: screen-shake 0.5s both; }
+        @keyframes screen-shake {
+            10%, 90% { transform: translate3d(-5px, 0, 0); }
+            20%, 80% { transform: translate3d(8px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-12px, 0, 0); }
+            40%, 60% { transform: translate3d(12px, 0, 0); }
+        }
+
+        /* แฟลชหน้าจอมืด */
+        .flash-dark { background: #000 !important; }
 
         /* พลุกระดาษเมื่อชนะ */
         .confetti {
@@ -39,60 +62,33 @@
             100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
         }
 
-        #stats-bar { 
-            display: flex; gap: 10px; padding: 10px;
-            width: 95%; max-width: 600px; height: 12%; 
-        }
-        .stat-box { 
-            flex: 1; display: flex; align-items: center; justify-content: center;
-            background: white; border-radius: 12px; font-weight: bold;
-            font-size: clamp(16px, 4vw, 24px); border-bottom: 4px solid #dfe6e9;
-        }
-
-        #game-wrapper {
-            flex: 1; width: 100%; display: flex; align-items: center; justify-content: center;
-            padding: 5px; min-height: 0;
-        }
-
-        .game-container { 
-            display: grid; grid-template-columns: repeat(3, 1fr); 
-            grid-template-rows: repeat(6, 1fr); gap: 6px; 
-            width: 100%; height: 100%; max-width: 400px; max-height: 600px;
-        }
-
+        /* ส่วนประกอบเกม */
+        #stats-bar { display: flex; gap: 10px; padding: 10px; width: 95%; max-width: 600px; height: 12%; }
+        .stat-box { flex: 1; display: flex; align-items: center; justify-content: center; background: white; border-radius: 12px; font-weight: bold; font-size: clamp(16px, 4vw, 24px); border-bottom: 4px solid #dfe6e9; }
+        #game-wrapper { flex: 1; width: 100%; display: flex; align-items: center; justify-content: center; padding: 5px; min-height: 0; }
+        .game-container { display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(6, 1fr); gap: 6px; width: 100%; height: 100%; max-width: 400px; max-height: 600px; }
+        
         @media (min-width: 768px) or (orientation: landscape) {
             .game-container { grid-template-columns: repeat(6, 1fr); grid-template-rows: repeat(3, 1fr); max-width: 1000px; max-height: 500px; }
         }
 
         .card { position: relative; width: 100%; height: 100%; perspective: 1000px; }
-        .card-inner {
-            position: relative; width: 100%; height: 100%;
-            transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            transform-style: preserve-3d;
-        }
+        .card-inner { position: relative; width: 100%; height: 100%; transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); transform-style: preserve-3d; }
         .card.flipped .card-inner { transform: rotateY(180deg); }
-        .card-front, .card-back {
-            position: absolute; width: 100%; height: 100%;
-            backface-visibility: hidden; border-radius: 10px;
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
+        .card-front, .card-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 10px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .card-front { background: var(--card-front); color: white; font-size: 12px; border: 2px solid #5758bb; font-weight: bold; }
         .card-back { background: var(--card-back); transform: rotateY(180deg); font-size: 40px; border: 3px solid #6c5ce7; }
         .card.matched .card-back { background: #e3fcef; border-color: var(--success); }
 
-        #message { 
-            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
-            padding: 30px; background: white; border-radius: 25px; display: none; 
-            text-align: center; box-shadow: 0 20px 80px rgba(0,0,0,0.4); 
-            width: 85%; max-width: 400px; z-index: 100; border: 5px solid var(--success);
-        }
+        #message { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); padding: 30px; background: white; border-radius: 25px; display: none; text-align: center; box-shadow: 0 20px 80px rgba(0,0,0,0.4); width: 85%; max-width: 400px; z-index: 1000; border: 5px solid var(--success); }
     </style>
 </head>
 <body>
 
+<div id="explosion-overlay"><div class="boom-circle"></div></div>
+
 <div id="stats-bar">
-    <div class="stat-box">⏱️ <span id="timer">20</span></div>
+    <div class="stat-box">⏱️ <span id="timer">25</span></div>
     <div class="stat-box">🎯 <span id="currentMatches">0</span>/9</div>
 </div>
 
@@ -109,7 +105,8 @@
 <script>
     const ppeIcons = ['⛑️', '🧯', '🦺', '🥽', '🧤', '🥾', '😷', '🎧', '🚧'];
     let ppeCards = [...ppeIcons, ...ppeIcons];
-    let flippedCards = [], matchedPairs = 0, timeLeft = 20, timerInterval, canClick = false;
+    // ปรับแก้ตรงนี้ให้เป็น 25
+    let flippedCards = [], matchedPairs = 0, timeLeft = 25, timerInterval, canClick = false;
 
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
@@ -123,6 +120,17 @@
         gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
         osc.connect(gain); gain.connect(audioCtx.destination);
         osc.start(); osc.stop(audioCtx.currentTime + duration);
+    }
+
+    function triggerExplosionEffect() {
+        const overlay = document.getElementById('explosion-overlay');
+        overlay.style.display = 'flex';
+        document.body.classList.add('shake-screen', 'flash-dark');
+        playSound(60, 1.5, 0.6, 'sawtooth');
+        setTimeout(() => {
+            overlay.style.display = 'none';
+            document.body.classList.remove('shake-screen', 'flash-dark');
+        }, 800);
     }
 
     function createConfetti() {
@@ -141,21 +149,14 @@
     }
 
     function playWinSound() {
-        const notes = [261.63, 329.63, 392.00, 523.25];
-        notes.forEach((freq, i) => {
-            setTimeout(() => playSound(freq, 0.6, 0.15, 'triangle'), i * 150);
-        });
-    }
-
-    function playExplosion() {
-        playSound(80, 1.5, 0.5, 'sawtooth'); // เสียงต่ำและหนักแน่นขึ้น
-        document.body.classList.add('shake-screen');
-        setTimeout(() => document.body.classList.remove('shake-screen'), 600);
+        const notes = [261, 329, 392, 523];
+        notes.forEach((f, i) => setTimeout(() => playSound(f, 0.6, 0.15, 'triangle'), i * 150));
     }
 
     function startGame() {
         const board = document.getElementById('gameBoard');
-        board.innerHTML = ''; matchedPairs = 0; timeLeft = 20; flippedCards = []; canClick = false;
+        board.innerHTML = ''; matchedPairs = 0; timeLeft = 25; // ปรับแก้ตรงนี้ให้เป็น 25
+        flippedCards = []; canClick = false;
         document.getElementById('timer').textContent = timeLeft;
         document.getElementById('currentMatches').textContent = '0';
         document.getElementById('message').style.display = 'none';
@@ -183,8 +184,7 @@
     document.getElementById('gameBoard').addEventListener('click', e => {
         const card = e.target.closest('.card');
         if (!card || !canClick || card.classList.contains('flipped') || card.classList.contains('matched')) return;
-        
-        playSound(500, 0.1, 0.1); 
+        playSound(500, 0.05, 0.1);
         card.classList.add('flipped');
         flippedCards.push(card);
 
@@ -213,9 +213,7 @@
         clearInterval(timerInterval); canClick = false;
         
         if (matchedPairs === 9) {
-            // กรณีชนะ: แสดงพลุและเสียงทันที แล้วหน่วงเวลาโชว์ข้อความ
-            playWinSound(); 
-            createConfetti();
+            playWinSound(); createConfetti();
             setTimeout(() => {
                 document.getElementById('msg-header').textContent = "ชนะแล้ว! 🎉";
                 document.getElementById('message').style.borderColor = "var(--success)";
@@ -223,14 +221,13 @@
                 document.getElementById('message').style.display = 'block';
             }, 1000);
         } else {
-            // กรณีแพ้: ระเบิดก่อน (สั่น+เสียง) แล้วค่อยโชว์ข้อความ
-            playExplosion();
+            triggerExplosionEffect();
             setTimeout(() => {
                 document.getElementById('msg-header').textContent = "ตู้มมม! 💥 หมดเวลา";
                 document.getElementById('message').style.borderColor = "var(--danger)";
                 document.getElementById('finalScore').textContent = matchedPairs;
                 document.getElementById('message').style.display = 'block';
-            }, 1200); // หน่วงเวลาให้เอฟเฟกต์ระเบิดทำงานก่อน
+            }, 1200);
         }
     }
 
